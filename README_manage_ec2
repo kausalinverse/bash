@@ -1,0 +1,111 @@
+Diese Document soll einen kleine einführung in die ec2-api-tools für 
+das linux bash scripting sein
+
+EINLEITUNG GOOD TO KNOW
+=======================
+What does EC2, AMI, AKI and ARI stand for?
+
+EC2: Elastic Compute Cloud, the Xen based virtual data center Amazon Web Services offers 
+
+AMI: Amazon Machine Image, the Xen DomU guest virtual machine. 
+
+AKI: Amazon Kernel Image, the Xen guest paravirtualized kernel used by an AMI. 
+
+
+
+
+1) Quellen
+==========
+
+http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/Welcome.html
+http://wiki.bitnami.org/BitNami_Cloud_Hosting/FAQ#How_to_install_ec2-api-tools.3f
+https://help.ubuntu.com/community/EC2StartersGuide
+
+
+1) Install via apt-get
+======================
+make sure you have multiverse on
+$ sudo apt-get update
+$ sudo apt-get install ec2-ami-tools 
+$ sudo apt-get install ec2-api-tools
+
+
+2.1) MAKE CERT AND PRIVATEKEY
+=============================
+amazon login > securety credentials > X.509 Zertifikate
+
+
+2.) UMGEBUNGSVARIABLEN
+======================
+Make sure you have the following environment variables set up in your shell profile. This is
+accomplished by adding the following lines to your ~/.bashrc if you use bash as your shell: 
+
+export EC2_KEYPAIR=XXXXXXXXXXXXXXXXXXXXXXX<your keypair name> # name only, not the file name
+export EC2_URL=https://ec2.<your ec2 region>.amazonaws.com
+export EC2_PRIVATE_KEY=$HOME/<where your private key is>/pk-XXXXXXXXXXXXXXXXXXXXXXXXXXXX.pem
+export EC2_CERT=$HOME/<where your certificate is>/cert-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.pem
+export JAVA_HOME=/usr/lib/jvm/java-6-openjdk/
+
+write the variables in .bashrc
+$ source ~/.bashrc
+
+vim .init_ec2-tools.conf
+
+----/// START  .init_ec2-tools.conf ///-----
+#!/bin/bash
+# Bevor you can enjoy the power or ec2-api/ami-tools
+# you have to export some variables.
+# make shure you have installed the ec2-api/ami-tools
+#
+EC2_KEYPAIR=XXXXXXXXXXXXXXXXXXXXXXXX
+EC2_URL=https://ec2.us-east-1.amazonaws.com
+
+EC2_PRIVATE_KEY=$HOME/syst/amazon_aws/cert/pk-XXXXXXXXXXXXXXXXXXX.pem
+EC2_CERT=$HOME/syst/amazon_aws/cert/cert-XXXXXXXXXXXXXXXXXXXXXX.pem
+JAVA_HOME=/usr/bin/java
+
+#export EC2_KEYPAIR
+export EC2_URL
+export EC2_PRIVATE_KEY
+export EC2_CERT
+export JAVA_HOME
+
+echo "Die ec2-tool relevanten Systemavriablen wurden exportiert. "
+----/// END  .init_ec2-tools.conf ///-----
+
+
+3.) SOME COMANDS
+================
+
+Check to see if it's working by running the following command: 
+$ ec2-describe-images -o self -o amazon
+$ ec2-describe-regions
+
+EC2 SECURETY GROUPS
+----
+$ ec2-add-group <group name> -d <description>
+$ ec2-delete-group <group name>
+$ ec2-describe-group [<group name> ...]
+
+
+RUN INSTANCES
+----
+start running an instance
+$ ec2-run-instances ami-xxxxx -k ${EC2_KEYPAIR} -t <instance type>
+
+To see the status of your instance, you can run the following command: 
+$ ec2-describe-instances
+
+set Port 22 default open
+$ ec2-authorize default -p 22
+
+login ssh
+$ ssh -i <private SSH key file> ubuntu@<external-host-name>
+
+
+Terminiren einer Instance (not only stop!!!)
+$ terminate-instances <instance_id>
+OR
+$ ec2kill <instance>
+
+
